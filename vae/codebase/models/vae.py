@@ -43,6 +43,16 @@ class VAE(nn.Module):
         # Todas las salidas deben ser escalares
         ################################################################################
 
+        m, v = self.enc(x)
+        z = ut.sample_gaussian(m, v)
+        logits = self.dec(z)
+        kl = ut.log_normal(z, m, v) - ut.log_normal(z, self.z_prior[0], self.z_prior[1])
+        rec = -ut.log_bernoulli_with_logits(x=x, logits=logits)
+        nelbo = kl + rec
+        nelbo = torch.mean(nelbo)
+        kl = torch.mean(kl)
+        rec = torch.mean(rec)
+
         ################################################################################
         # Fin de la modificación del código
         ################################################################################

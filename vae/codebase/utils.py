@@ -41,6 +41,8 @@ def sample_gaussian(m, v):
     # Muestrea z
     ################################################################################
 
+    z = m + torch.randn_like(v) * torch.sqrt(v)
+
     ################################################################################
     # Fin de la modificación del código
     ################################################################################
@@ -68,6 +70,9 @@ def log_normal(x, m, v):
     # la última dimensión
     ################################################################################
 
+    dim = x.size(-1)
+    log_prob = -0.5 * (dim * np.log(2 * np.pi) + torch.log(v).sum(-1) + (((x - m) ** 2) / v).sum(-1))
+
     ################################################################################
     # Fin de la modificación del código
     ################################################################################
@@ -92,6 +97,10 @@ def log_normal_mixture(z, m, v):
     # en el batch
     ################################################################################
     # expanda z para que coincida la dimensionalidad de m y v
+
+    z = z.unsqueeze(1)  # (batch, 1, dim)
+    log_probs = log_normal(z, m, v)  # (batch, mix)
+    log_prob = log_mean_exp(log_probs, dim=1)  # (batch,)
 
     ################################################################################
     # Fin de la modificación del código
